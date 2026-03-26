@@ -9,12 +9,14 @@ class RAGPipeline:
         if not retrieved_chunks:
             return {
                 "answer": "未检索到相关证据，无法回答该问题。",
-                "sources": []
+                "sources": [],
             }
 
         evidence_text = []
         for i, item in enumerate(retrieved_chunks, start=1):
-            evidence_text.append(f"[证据{i}]\n{item['chunk']}")
+            evidence_text.append(
+                f"[证据{i} | idx={item['index']} | score={item['score']:.4f} | source={item['source']}]\n{item['chunk']}"
+            )
 
         evidence_block = "\n\n".join(evidence_text)
 
@@ -27,10 +29,10 @@ class RAGPipeline:
         user_prompt = f"""
 请根据以下证据回答问题。
 
-【问题】
+〖问题〗
 {question}
 
-【证据】
+〖证据〗
 {evidence_block}
 
 要求：
@@ -44,5 +46,5 @@ class RAGPipeline:
 
         return {
             "answer": answer,
-            "sources": retrieved_chunks
+            "sources": retrieved_chunks,
         }

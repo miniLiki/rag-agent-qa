@@ -6,3 +6,5 @@ __pycache__/
 .streamlit/
 *_backup.py
 data/uploads/
+milvus_rag.db
+.milvus_rag.db.lock

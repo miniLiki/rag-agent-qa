@@ -1,22 +1,27 @@
-import numpy as np
+from functools import lru_cache
+from sentence_transformers import SentenceTransformer
 
 
-def simple_embed(text: str, dim: int = 128) -> np.ndarray:
-    """
-    一个教学用的简化 embedding 方法：
-    将文本中字符的 unicode 值做简单映射，生成固定长度向量。
-    这个方法不适合正式项目，但适合先打通检索流程。
-    """
-    vector = np.zeros(dim, dtype=np.float32)
+EMBED_MODEL_NAME = "BAAI/bge-small-zh-v1.5"
 
-    if not text:
-        return vector
 
-    for i, ch in enumerate(text):
-        vector[i % dim] += ord(ch) * 0.001
+@lru_cache(maxsize=1)
+def get_embedder() -> SentenceTransformer:
+    return SentenceTransformer(EMBED_MODEL_NAME)
 
-    norm = np.linalg.norm(vector)
-    if norm > 0:
-        vector = vector / norm
 
-    return vector
+def embed_text(text: str) -> list[float]:
+    model = get_embedder()
+    vector = model.encode(text, normalize_embeddings=True)
+    return vector.tolist()
+
+
+def embed_texts(texts: list[str]) -> list[list[float]]:
+    model = get_embedder()
+    vectors = model.encode(texts, normalize_embeddings=True)
+    return vectors.tolist()
+
+
+def embedding_dim() -> int:
+    model = get_embedder()
+    return model.get_sentence_embedding_dimension()
